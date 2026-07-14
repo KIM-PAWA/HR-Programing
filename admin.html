@@ -545,8 +545,9 @@ async function confirmAction() {
     return;
   }
 
+  const action = pendingAction;
   closeConfirmModal();
-  if (pendingAction) pendingAction();
+  if (action) action();
 }
 
 // ============================================================
@@ -901,7 +902,7 @@ function editLeaveRow(rowIndex) {
 }
 
 function deleteLeaveRow(rowIndex) {
-  const rec = DB_RECORDS.find(r => r.rowIndex === rowIndex);
+  const rec = DB_RECORDS.find(r => Number(r.rowIndex) === Number(rowIndex));
   const name = rec ? rec.empName : "";
   openConfirmModal(`ยืนยันการลบรายการลาของ ${name}`, async () => {
     try {
