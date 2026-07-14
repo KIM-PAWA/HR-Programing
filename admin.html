@@ -533,16 +533,17 @@ function closeConfirmModal() {
 }
 
 async function confirmAction() {
-  const pass    = document.getElementById("confirmPass").value.trim();
-  const errBox  = document.getElementById("confirmModalError");
+  const pass   = document.getElementById("confirmPass").value.trim();
+  const errBox = document.getElementById("confirmModalError");
   errBox.classList.remove("show");
   if (!pass) { errBox.textContent = "กรุณากรอกรหัสผ่าน"; errBox.classList.add("show"); return; }
 
-  // verify รหัสผ่านกับ server
-  try {
-    const res = await jsonpCall({ action: "adminLogin", username: ADMIN_NAME, password: pass });
-    if (!res.success) { errBox.textContent = "รหัสผ่านไม่ถูกต้อง"; errBox.classList.add("show"); return; }
-  } catch(err) { errBox.textContent = "เชื่อมต่อไม่ได้"; errBox.classList.add("show"); return; }
+  // เปรียบเทียบกับรหัสที่เก็บไว้ตอน login
+  if (pass !== ADMIN_PASS) {
+    errBox.textContent = "รหัสผ่านไม่ถูกต้อง";
+    errBox.classList.add("show");
+    return;
+  }
 
   closeConfirmModal();
   if (pendingAction) pendingAction();
