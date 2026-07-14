@@ -1034,6 +1034,15 @@ function viewEmployee(empId) {
   document.getElementById("viewEmpModal").classList.add("show");
 }
 
+function thaiToDateInputEmp(thaiStr) {
+  if (!thaiStr) return "";
+  const parts = String(thaiStr).split("/");
+  if (parts.length !== 3) return "";
+  let y = parseInt(parts[2]);
+  if (y > 2400) y -= 543;
+  return `${y}-${parts[1].padStart(2,"0")}-${parts[0].padStart(2,"0")}`;
+}
+
 function openEmpModal(empId) {
   editingEmpId = empId || null;
   document.getElementById("empModalTitle").textContent = empId ? "แก้ไขข้อมูลพนักงาน" : "เพิ่มพนักงานใหม่";
@@ -1051,9 +1060,18 @@ function openEmpModal(empId) {
   if (empId) {
     const e = DB_EMPLOYEES.find(x => x.id === empId);
     if (e) {
-      document.getElementById("empFormId").value       = e.id;
-      document.getElementById("empFormName").value     = e.fullName;
-      document.getElementById("empFormPosition").value = e.position || "";
+      document.getElementById("empFormId").value        = e.id;
+      document.getElementById("empFormName").value      = e.fullName || "";
+      document.getElementById("empFormIdCard").value    = e.idCard   || "";
+      document.getElementById("empFormPosition").value  = e.position || "";
+      document.getElementById("empFormSalary").value    = e.salary   || "";
+      // dropdown
+      if (e.empType)   document.getElementById("empFormType").value      = e.empType;
+      if (e.dept)      document.getElementById("empFormDept").value       = e.dept;
+      if (e.education) document.getElementById("empFormEducation").value  = e.education;
+      // date fields
+      if (e.birthDate)  document.getElementById("empFormBirth").value     = thaiToDateInputEmp(e.birthDate);
+      if (e.startDate)  document.getElementById("empFormStartDate").value = thaiToDateInputEmp(e.startDate);
     }
   }
   document.getElementById("empModal").classList.add("show");
@@ -1075,6 +1093,9 @@ async function saveEmployee() {
     salary:    document.getElementById("empFormSalary").value.trim()
   };
   if (!payload.id || !payload.name) { showToast("กรุณากรอกรหัสและชื่อพนักงาน", true); return; }
+
+  // แสดง popup ยืนยันก่อนบันทึก
+  if (!confirm(`กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนทำการบันทึก\n\nรหัส: ${payload.id}\nชื่อ: ${payload.name}\nแผนก: ${payload.dept || "-"}\nตำแหน่ง: ${payload.position || "-"}\nประเภท: ${payload.empType || "-"}\n\nยืนยันการบันทึกหรือไม่?`)) return;
 
   if (editingEmpId) {
     // แก้ไข → ต้องยืนยันรหัสผ่าน
