@@ -321,14 +321,14 @@
     <div style="font-size:0.78rem;font-weight:700;color:var(--mint-dark);margin:8px 0 6px;letter-spacing:0.05em;">👤 ข้อมูลส่วนตัว</div>
     <div class="field"><label>ชื่อ-นามสกุล (พร้อมคำนำหน้า)</label><input id="empFormName" type="text" placeholder="เช่น นาย/นาง/น.ส. ชื่อ นามสกุล" /></div>
     <div class="field"><label>เลขบัตรประชาชน</label><input id="empFormIdCard" type="text" /></div>
-    <div class="field"><label>วัน/เดือน/ปีเกิด (ค.ศ.)</label><input id="empFormBirth" type="date" /></div>
+    <div class="field"><label>วัน/เดือน/ปีเกิด (พ.ศ.)</label><input id="empFormBirth" type="text" placeholder="เลือกวันเกิด" readonly style="cursor:pointer;" /></div>
 
     <div style="font-size:0.78rem;font-weight:700;color:var(--mint-dark);margin:12px 0 6px;letter-spacing:0.05em;">🏢 ข้อมูลการทำงาน</div>
     <div class="field"><label>ประเภทพนักงาน</label><select id="empFormType"><option value="">-- เลือกประเภท --</option><option value="Monthly">Monthly</option><option value="Daily">Daily</option></select></div>
     <div class="field"><label>แผนก</label><select id="empFormDept" onchange="onDeptChange()"><option value="">-- เลือกแผนก --</option><option>สำนักงานโรงงาน</option><option>สำนักงานใหญ่</option><option>ปั๊มบางจาก</option><option>ซ่อมบำรุง</option><option>รักษาความปลอดภัย</option><option>ผลิต</option><option>วัตถุดิบ</option><option>แลป</option><option>ส่งออก</option></select></div>
     <div class="field"><label>ตำแหน่ง</label><input id="empFormPosition" type="text" /></div>
     <div class="field"><label>วุฒิการศึกษา</label><select id="empFormEducation"><option value="">-- เลือกวุฒิ --</option><option>ม.3 หรือต่ำกว่า</option><option>ม.6 / ปวช.</option><option>ปวส.</option><option>ปริญญาตรี</option><option>ปริญญาโท</option><option>ปริญญาเอก</option></select></div>
-    <div class="field"><label>วันเข้างาน (ค.ศ.)</label><input id="empFormStartDate" type="date" /></div>
+    <div class="field"><label>วันเข้างาน (พ.ศ.)</label><input id="empFormStartDate" type="text" placeholder="เลือกวันเข้างาน" readonly style="cursor:pointer;" /></div>
     <div class="field"><label>เงินเดือน/ค่าแรง (บาท)</label><input id="empFormSalary" type="number" placeholder="0" /></div>
 
     <div style="font-size:0.78rem;font-weight:700;color:var(--mint-dark);margin:12px 0 6px;letter-spacing:0.05em;">🔑 รหัสพนักงาน</div>
@@ -1069,9 +1069,17 @@ function openEmpModal(empId) {
       if (e.empType)   document.getElementById("empFormType").value      = e.empType;
       if (e.dept)      document.getElementById("empFormDept").value       = e.dept;
       if (e.education) document.getElementById("empFormEducation").value  = e.education;
-      // date fields
-      if (e.birthDate)  document.getElementById("empFormBirth").value     = thaiToDateInputEmp(e.birthDate);
-      if (e.startDate)  document.getElementById("empFormStartDate").value = thaiToDateInputEmp(e.startDate);
+      // date fields - set via flatpickr instance
+      if (e.birthDate)  {
+        const fp = document.getElementById("empFormBirth")._flatpickr;
+        if (fp) fp.setDate(thaiToDateInputEmp(e.birthDate));
+        else document.getElementById("empFormBirth").value = e.birthDate;
+      }
+      if (e.startDate)  {
+        const fp = document.getElementById("empFormStartDate")._flatpickr;
+        if (fp) fp.setDate(thaiToDateInputEmp(e.startDate));
+        else document.getElementById("empFormStartDate").value = e.startDate;
+      }
     }
   }
   document.getElementById("empModal").classList.add("show");
@@ -1084,12 +1092,12 @@ async function saveEmployee() {
     id:        document.getElementById("empFormId").value.trim(),
     name:      document.getElementById("empFormName").value.trim(),
     idCard:    formatIdCard(document.getElementById("empFormIdCard").value.trim()),
-    birthDate: document.getElementById("empFormBirth").value ? dateInputToThai(document.getElementById("empFormBirth").value) : "",
+    birthDate: document.getElementById("empFormBirth").value ? convertToThaiYear(document.getElementById("empFormBirth").value) : "",
     empType:   document.getElementById("empFormType").value.trim(),
     dept:      document.getElementById("empFormDept").value.trim(),
     position:  document.getElementById("empFormPosition").value.trim(),
     education: document.getElementById("empFormEducation").value.trim(),
-    startDate: document.getElementById("empFormStartDate").value ? dateInputToThai(document.getElementById("empFormStartDate").value) : "",
+    startDate: document.getElementById("empFormStartDate").value ? convertToThaiYear(document.getElementById("empFormStartDate").value) : "",
     salary:    document.getElementById("empFormSalary").value.trim()
   };
   if (!payload.id || !payload.name) { showToast("กรุณากรอกรหัสและชื่อพนักงาน", true); return; }
@@ -1169,6 +1177,16 @@ flatpickr("#leaveEndDate", {
   dateFormat: "d/m/Y",
   allowInput: false,
   onChange: (dates) => showThaiDate(dates[0], "leaveEndDateThai")
+});
+
+flatpickr("#empFormBirth", {
+  dateFormat: "d/m/Y",
+  allowInput: false,
+});
+
+flatpickr("#empFormStartDate", {
+  dateFormat: "d/m/Y",
+  allowInput: false,
 });
 </script>
 </body>
