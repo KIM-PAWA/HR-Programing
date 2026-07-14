@@ -1044,6 +1044,17 @@ function thaiToDateInputEmp(thaiStr) {
 }
 
 function openEmpModal(empId) {
+  if (empId) {
+    // ต้องยืนยันรหัสผ่านก่อนแก้ไข
+    openConfirmModal(`ยืนยันการแก้ไขข้อมูลพนักงาน`, () => {
+      _openEmpModalInner(empId);
+    });
+    return;
+  }
+  _openEmpModalInner(null);
+}
+
+function _openEmpModalInner(empId) {
   editingEmpId = empId || null;
   document.getElementById("empModalTitle").textContent = empId ? "แก้ไขข้อมูลพนักงาน" : "เพิ่มพนักงานใหม่";
   ["empFormName","empFormIdCard","empFormPosition"].forEach(id => document.getElementById(id).value = "");
